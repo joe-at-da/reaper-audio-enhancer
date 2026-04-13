@@ -429,6 +429,10 @@ class MainWindow(QMainWindow):
             if script_installed:
                 success_msg += "\n\n" + self.localization.get("video_script_installed") + "\n\n"
                 success_msg += self.localization.get("video_import_options") + "\n\n"
+                
+                # Get script path
+                script_path = video_installer.get_script_path()
+                
                 success_msg += self.localization.get("video_option_1_title") + "\n"
                 success_msg += self.localization.get("video_option_1_step_1") + "\n"
                 success_msg += self.localization.get("video_option_1_step_2") + "\n"

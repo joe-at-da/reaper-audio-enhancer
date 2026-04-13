@@ -284,7 +284,12 @@ class MainWindow(QMainWindow):
             
             success_msg = self.localization.get("audio_processed_success")
             self.status_label.setText(f"{success_msg}: {output_path.name}")
-            QMessageBox.information(self, "Success", f"{success_msg}: {output_path}")
+            success_title = self.localization.get("success_title")
+            
+            # Get localized instructions
+            instructions_template = self.localization.get("audio_processed_instructions")
+            instructions = f"{success_msg}\n\n{instructions_template.format(path=output_path)}"
+            QMessageBox.information(self, success_title, instructions)
         except Exception as e:
             QMessageBox.critical(self, "Error", f"Error processing audio: {e}")
             app_logger.error(f"Processing error: {e}")
@@ -308,9 +313,15 @@ class MainWindow(QMainWindow):
             
             export_success_msg = self.localization.get("export_success")
             self.status_label.setText(f"{export_success_msg}: {export_path.name}")
-            QMessageBox.information(self, "Success", f"{export_success_msg}: {export_path}")
+            success_title = self.localization.get("success_title")
+            
+            # Get localized instructions
+            instructions_template = self.localization.get("export_instructions")
+            instructions = f"{export_success_msg}\n\n{instructions_template.format(path=export_path)}"
+            QMessageBox.information(self, success_title, instructions)
         except Exception as e:
-            QMessageBox.critical(self, "Error", f"Error exporting: {e}")
+            error_title = self.localization.get("error_title") if self.localization.get("error_title") else "Error"
+            QMessageBox.critical(self, error_title, f"Error exporting: {e}")
             app_logger.error(f"Export error: {e}")
     
     def create_menu_bar(self):

@@ -14,6 +14,31 @@ from src.reaper import ExportGenerator
 from src.localization import get_localization
 from src.gui.settings_dialog import SettingsDialog
 
+
+def is_audio_file(file_path):
+    """Check if file is a valid audio file."""
+    try:
+        import librosa
+        librosa.load(file_path, sr=None, duration=0.1)
+        return True
+    except Exception as e:
+        app_logger.debug(f"Audio validation failed for {file_path}: {e}")
+        return False
+
+
+def is_video_file(file_path):
+    """Check if file is a valid video file."""
+    try:
+        import cv2
+        cap = cv2.VideoCapture(file_path)
+        ret = cap.isOpened()
+        if ret:
+            cap.release()
+        return ret
+    except Exception as e:
+        app_logger.debug(f"Video validation failed for {file_path}: {e}")
+        return False
+
 class AnalysisThread(QThread):
     progress = pyqtSignal(str)
     finished = pyqtSignal(dict)
@@ -211,6 +236,13 @@ class MainWindow(QMainWindow):
             "Audio Files (*.wav *.mp3 *.flac);;All Files (*)"
         )
         if file_path:
+            # Validate that it's actually an audio file
+            if not is_audio_file(file_path):
+                error_title = self.localization.get("error_title")
+                error_msg = self.localization.get("error_invalid_audio_file")
+                QMessageBox.warning(self, error_title, error_msg)
+                return
+            
             self.audio_file = file_path
             self.audio_label.setText(Path(file_path).name)
             self.status_label.setText(f"Audio loaded: {Path(file_path).name}")
@@ -221,6 +253,13 @@ class MainWindow(QMainWindow):
             "Video Files (*.mp4 *.mov *.avi);;All Files (*)"
         )
         if file_path:
+            # Validate that it's actually a video file
+            if not is_video_file(file_path):
+                error_title = self.localization.get("error_title")
+                error_msg = self.localization.get("error_invalid_video_file")
+                QMessageBox.warning(self, error_title, error_msg)
+                return
+            
             self.video_file = file_path
             self.video_label.setText(Path(file_path).name)
             self.status_label.setText(f"Video loaded: {Path(file_path).name}")

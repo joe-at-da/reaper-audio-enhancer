@@ -34,32 +34,18 @@ class ReaperProjectGenerator:
         """Create REAPER project content in native format."""
         lines = []
         
-        # REAPER project header
+        # REAPER project header (minimal, valid format)
         lines.append("<REAPER_PROJECT 0.1 \"6.82\" 1629820800")
         lines.append("  SAMPLERATE 44100 5 2")
         lines.append("  TEMPO 120 4 4")
         lines.append("  PLAYRATE 1 0 0.25 8")
         lines.append("  CURSOR 0")
         lines.append("  SELECTION 0 0")
-        lines.append("  VOFFSET 0")
         lines.append("  ZOOM 6.41 0 0")
         lines.append("  VZOOM 0 0")
-        lines.append("  DEFAULT 1000 1000 1.0 1.0 1.0 0 '' '' 0")
         lines.append("  MASTER_VOLUME 1.0 0 -1 -1 1")
-        lines.append("  MASTER_VOLPAN 1 0 -1 -1")
-        lines.append("  MASTER_MUTE 0 -1")
         lines.append("  MASTER_FX 0")
         lines.append("  MASTER_SEL 0")
-        lines.append("  MASTER_ASEL 0")
-        lines.append("  MASTER_Chase -1 -1 0")
-        lines.append("  MASTER_COMP 0 0 0 0 0 -1 -1 -1")
-        lines.append("  MASTER_LIMITER 1 0.1 1 0 -1 -1 '' 0 0 0")
-        lines.append("  MASTER_BUSCOMP 0 0 0 0 0 -1 -1 -1")
-        lines.append("  MASTER_NUMERATOR 4")
-        lines.append("  MASTER_DENOMINATOR 4")
-        lines.append("  MASTER_PROJECTLEN 0")
-        lines.append("  MASTER_EDITVIEW 0")
-        lines.append("  MASTER_PERFFLAGS 0")
         lines.append("")
         
         # Add tracks

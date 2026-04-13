@@ -1,7 +1,8 @@
 from PyQt5.QtWidgets import (QDialog, QVBoxLayout, QHBoxLayout, QLabel, 
-                             QComboBox, QPushButton, QGroupBox)
+                             QComboBox, QPushButton, QGroupBox, QLineEdit, QSpinBox)
 from PyQt5.QtCore import Qt, pyqtSignal
 from src.localization import get_localization
+from src.utils import config
 
 
 class SettingsDialog(QDialog):
@@ -18,7 +19,7 @@ class SettingsDialog(QDialog):
     def init_ui(self):
         """Initialize the UI."""
         self.setWindowTitle(self.localization.get("settings_menu"))
-        self.setGeometry(100, 100, 400, 200)
+        self.setGeometry(100, 100, 500, 350)
         
         layout = QVBoxLayout()
         
@@ -42,6 +43,39 @@ class SettingsDialog(QDialog):
         language_group.setLayout(language_layout)
         
         layout.addWidget(language_group)
+        
+        # REAPER settings group
+        reaper_group = QGroupBox("REAPER OSC Settings")
+        reaper_layout = QVBoxLayout()
+        
+        # OSC Host
+        host_layout = QHBoxLayout()
+        host_label = QLabel("OSC Host:")
+        self.osc_host_input = QLineEdit()
+        self.osc_host_input.setPlaceholderText("127.0.0.1")
+        host_layout.addWidget(host_label)
+        host_layout.addWidget(self.osc_host_input)
+        reaper_layout.addLayout(host_layout)
+        
+        # OSC Port
+        port_layout = QHBoxLayout()
+        port_label = QLabel("OSC Port:")
+        self.osc_port_input = QSpinBox()
+        self.osc_port_input.setMinimum(1)
+        self.osc_port_input.setMaximum(65535)
+        self.osc_port_input.setValue(9000)
+        port_layout.addWidget(port_label)
+        port_layout.addWidget(self.osc_port_input)
+        port_layout.addStretch()
+        reaper_layout.addLayout(port_layout)
+        
+        # Info label
+        info_label = QLabel("Configure REAPER OSC connection settings.\nDefault: 127.0.0.1:9000")
+        info_label.setStyleSheet("color: #888888; font-size: 9pt;")
+        reaper_layout.addWidget(info_label)
+        
+        reaper_group.setLayout(reaper_layout)
+        layout.addWidget(reaper_group)
         layout.addStretch()
         
         # Buttons
@@ -68,6 +102,28 @@ class SettingsDialog(QDialog):
         index = self.language_combo.findData(current_lang)
         if index >= 0:
             self.language_combo.setCurrentIndex(index)
+        
+        # Load REAPER OSC settings
+        osc_host = config.get("osc_host", "127.0.0.1")
+        osc_port = config.get("osc_port", 9000)
+        
+        self.osc_host_input.setText(osc_host)
+        self.osc_port_input.setValue(osc_port)
+    
+    def save_settings(self):
+        """Save settings to config."""
+        # Save REAPER OSC settings
+        osc_host = self.osc_host_input.text().strip() or "127.0.0.1"
+        osc_port = self.osc_port_input.value()
+        
+        config.set("osc_host", osc_host)
+        config.set("osc_port", osc_port)
+        config.save()
+    
+    def accept(self):
+        """Accept and save settings."""
+        self.save_settings()
+        super().accept()
     
     def on_language_changed(self):
         """Handle language change."""

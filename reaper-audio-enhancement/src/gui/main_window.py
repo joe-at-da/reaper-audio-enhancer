@@ -160,6 +160,11 @@ class MainWindow(QMainWindow):
         self.export_btn.clicked.connect(self.export_to_reaper)
         button_layout.addWidget(self.export_btn)
         
+        self.import_btn = QPushButton(self.localization.get("import_reaper_button"))
+        self.import_btn.setToolTip(self.localization.get("tooltip_import_reaper"))
+        self.import_btn.clicked.connect(self.import_to_reaper)
+        button_layout.addWidget(self.import_btn)
+        
         layout.addLayout(button_layout)
         
         self.progress_bar = QProgressBar()
@@ -324,6 +329,69 @@ class MainWindow(QMainWindow):
             QMessageBox.critical(self, error_title, f"Error exporting: {e}")
             app_logger.error(f"Export error: {e}")
     
+    def import_to_reaper(self):
+        """Open file dialog to select JSON export file and import to REAPER."""
+        try:
+            file_path, _ = QFileDialog.getOpenFileName(
+                self, "Select REAPER Export JSON File", "",
+                "JSON Files (*.json);;All Files (*)"
+            )
+            
+            if not file_path:
+                return
+            
+            from src.reaper.reaper_importer import ReaperImporter
+            from src.reaper.osc_importer import OSCImporter
+            from src.reaper.reascript_importer import ReaScriptImporter
+            
+            # Load and validate JSON
+            importer = ReaperImporter()
+            if not importer.import_json(file_path):
+                error_msg = self.localization.get("error_title")
+                QMessageBox.critical(self, error_msg, "Failed to load JSON file")
+                return
+            
+            # Validate audio files
+            validation = importer.validate_audio_files()
+            if not validation["audio_file"]:
+                error_msg = self.localization.get("error_title")
+                QMessageBox.critical(self, error_msg, "Original audio file not found")
+                return
+            
+            # Try OSC first
+            osc = OSCImporter()
+            if osc.connect():
+                export_data = importer.get_export_data()
+                if osc.import_from_data(export_data):
+                    success_title = self.localization.get("success_title")
+                    success_msg = self.localization.get("import_success")
+                    QMessageBox.information(self, success_title, success_msg)
+                    return
+            
+            # Fall back to ReaScript
+            reascript = ReaScriptImporter()
+            script_path = reascript.save_reascript(importer.get_export_data())
+            
+            if script_path:
+                success_title = self.localization.get("success_title")
+                success_msg = (
+                    f"ReaScript generated successfully!\n\n"
+                    f"Script saved to:\n{script_path}\n\n"
+                    f"To import into REAPER:\n"
+                    f"1. Open REAPER\n"
+                    f"2. Go to: Actions > Show Console\n"
+                    f"3. Click 'Load' and select the script file\n"
+                    f"4. Click 'Run'"
+                )
+                QMessageBox.information(self, success_title, success_msg)
+            else:
+                error_msg = self.localization.get("error_title")
+                QMessageBox.critical(self, error_msg, "Failed to generate ReaScript")
+        except Exception as e:
+            error_msg = self.localization.get("error_title")
+            QMessageBox.critical(self, error_msg, f"Error: {e}")
+            app_logger.error(f"Import error: {e}")
+    
     def create_menu_bar(self):
         """Create menu bar with Settings menu and language flags."""
         menubar = self.menuBar()
@@ -395,6 +463,8 @@ class MainWindow(QMainWindow):
             self.process_btn.setToolTip(self.localization.get("tooltip_process_audio"))
             self.export_btn.setText(self.localization.get("export_reaper_button"))
             self.export_btn.setToolTip(self.localization.get("tooltip_export_reaper"))
+            self.import_btn.setText(self.localization.get("import_reaper_button"))
+            self.import_btn.setToolTip(self.localization.get("tooltip_import_reaper"))
             
             # Update slider tooltip
             self.strength_slider.setToolTip(self.localization.get("tooltip_noise_reduction"))

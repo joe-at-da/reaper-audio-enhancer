@@ -91,8 +91,11 @@ end
 
 local take = reaper.GetActiveTake(item)
 if not take then
-  reaper.ShowMessageBox("Failed to create take", "Error", 0)
-  return
+  take = reaper.AddTakeToMediaItem(item)
+  if not take then
+    reaper.ShowMessageBox("Failed to create take", "Error", 0)
+    return
+  end
 end
 
 reaper.SetMediaItemTake_Source(take, source)

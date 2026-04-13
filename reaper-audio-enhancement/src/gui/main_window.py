@@ -415,17 +415,21 @@ class MainWindow(QMainWindow):
                 QMessageBox.critical(self, error_msg, "Failed to generate REAPER project file")
                 return
             
-            # Show success message with VLC restart note
+            # Show success message with instructions
             success_title = self.localization.get("success_title")
             success_msg = self.localization.get("import_success")
             
-            # Add note about restarting REAPER if VLC was just configured
+            # Add instructions for adding video
+            success_msg += "\n\n📹 To add video to this project:\n"
+            success_msg += "1. In REAPER: Insert > Media File\n"
+            success_msg += "2. Select: " + str(self.video_file) + "\n"
+            success_msg += "3. View > Video Window (Cmd+Shift+V)\n"
+            success_msg += "4. Click Play\n"
+            
+            # Add note about VLC if just configured
             if self.vlc_configured:
-                success_msg += "\n\n⚠️  IMPORTANT: REAPER has been configured to use VLC.\n"
-                success_msg += "Please close REAPER completely and restart it for video to display.\n"
-                success_msg += "Then open View > Video Window (Cmd+Shift+V) and click Play."
-            else:
-                success_msg += "\n\nTo view video: Open View > Video Window (Cmd+Shift+V) and click Play."
+                success_msg += "\n⚠️  REAPER was configured to use VLC.\n"
+                success_msg += "Close and restart REAPER if video doesn't display."
             
             QMessageBox.information(self, success_title, success_msg)
             

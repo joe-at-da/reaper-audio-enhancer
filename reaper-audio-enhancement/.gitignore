@@ -1,0 +1,15 @@
+venv/
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+dist/
+build/
+.config/
+.pytest_cache/
+*.wav
+*.mp4
+*.mov
+*.mp3
+.DS_Store
+*.log

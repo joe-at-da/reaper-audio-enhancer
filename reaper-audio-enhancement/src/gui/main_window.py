@@ -9,6 +9,7 @@ from PyQt5.QtCore import Qt, QThread, pyqtSignal
 
 from src.utils import app_logger, config
 from src.utils.reaper_config_writer import get_reaper_config_writer
+from src.reaper.reaper_video_installer import get_reaper_video_installer
 from src.audio import NoiseDetector, NoiseReducer, AudioSuggester
 from src.video import FrameExtractor, SceneDetector
 from src.reaper import ExportGenerator
@@ -415,12 +416,22 @@ class MainWindow(QMainWindow):
                 QMessageBox.critical(self, error_msg, "Failed to generate REAPER project file")
                 return
             
-            # Show success message with instructions
+            # Install video script
+            video_installer = get_reaper_video_installer()
+            video_installer.install_video_script()
+            
+            # Show success message with video import options
             success_title = self.localization.get("success_title")
             success_msg = self.localization.get("import_success")
             
-            # Add instructions for adding video
-            success_msg += "\n\n📹 To add video to this project:\n"
+            success_msg += "\n\n📹 Video Import Options:\n\n"
+            success_msg += "Option 1 (Automatic - Recommended):\n"
+            success_msg += "1. In REAPER: Actions > Show action list\n"
+            success_msg += "2. Search for: 'add_video_to_reaper'\n"
+            success_msg += "3. Click 'Run'\n"
+            success_msg += "4. Video will be added automatically!\n\n"
+            
+            success_msg += "Option 2 (Manual):\n"
             success_msg += "1. In REAPER: Insert > Media File\n"
             success_msg += "2. Select: " + str(self.video_file) + "\n"
             success_msg += "3. View > Video Window (Cmd+Shift+V)\n"

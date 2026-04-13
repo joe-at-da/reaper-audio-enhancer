@@ -37,28 +37,82 @@ class ReaperVideoInstaller:
             # Create Scripts folder if it doesn't exist
             self.reaper_scripts_path.mkdir(parents=True, exist_ok=True)
             
-            # Get the script source
-            script_source = Path(__file__).parent.parent.parent / "scripts" / "add_video_to_reaper.py"
+            # Create Lua ReaScript (REAPER can load this directly)
+            lua_script = self._create_lua_script()
+            lua_dest = self.reaper_scripts_path / "add_video_to_reaper.lua"
             
-            if not script_source.exists():
-                app_logger.error(f"Script not found: {script_source}")
-                return False
+            with open(lua_dest, 'w') as f:
+                f.write(lua_script)
             
-            # Copy script to REAPER Scripts folder
-            script_dest = self.reaper_scripts_path / "add_video_to_reaper.py"
-            
-            with open(script_source, 'r') as f:
-                script_content = f.read()
-            
-            with open(script_dest, 'w') as f:
-                f.write(script_content)
-            
-            app_logger.info(f"Video script installed: {script_dest}")
+            app_logger.info(f"Video script installed: {lua_dest}")
             return True
         
         except Exception as e:
             app_logger.error(f"Error installing video script: {e}")
             return False
+    
+    def _create_lua_script(self):
+        """Create Lua ReaScript for adding video to REAPER."""
+        video_file = "/Users/joebradley/Projects/ihor-audio-main/reaper-audio-enhancement/assets/sample_files/sample_video.mp4"
+        
+        return f"""-- REAPER ReaScript: Add Video to Project
+-- This script adds a video file to the current REAPER project
+-- @description Add video file to current project
+-- @version 1.0
+
+local video_file = "{video_file}"
+
+local file = io.open(video_file, "r")
+if not file then
+  reaper.ShowMessageBox("Video file not found:\\n" .. video_file, "Error", 0)
+  return
+end
+file:close()
+
+local proj = 0
+local track_count = reaper.CountTracks(proj)
+
+reaper.InsertTrackAtIndex(track_count, true)
+local video_track = reaper.GetTrack(proj, track_count)
+
+reaper.GetSetMediaTrackInfo_String(video_track, "P_NAME", "Video", true)
+
+local item = reaper.AddMediaItemToTrack(video_track)
+if not item then
+  reaper.ShowMessageBox("Failed to create media item", "Error", 0)
+  return
+end
+
+local source = reaper.PCM_Source_CreateFromFile(video_file)
+if not source then
+  reaper.ShowMessageBox("Failed to load video file:\\n" .. video_file, "Error", 0)
+  return
+end
+
+local take = reaper.GetActiveTake(item)
+if not take then
+  reaper.ShowMessageBox("Failed to create take", "Error", 0)
+  return
+end
+
+reaper.SetMediaItemTake_Source(take, source)
+
+local source_length = reaper.GetMediaSourceLength(source)
+reaper.SetMediaItemLength(item, source_length, false)
+
+reaper.UpdateArrange()
+
+reaper.ShowMessageBox(
+  "Video added successfully!\\n\\n" ..
+  "File: {video_file}\\n" ..
+  "Duration: " .. string.format("%.2f", source_length) .. "s\\n\\n" ..
+  "To view video:\\n" ..
+  "1. View > Video Window (Cmd+Shift+V)\\n" ..
+  "2. Click Play",
+  "Success",
+  0
+)
+"""
     
     def run_video_script_via_osc(self, osc_host="127.0.0.1", osc_port=9000):
         """Run video script via REAPER OSC."""

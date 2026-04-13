@@ -120,46 +120,19 @@ class ReaperVideoInstaller:
             app_logger.error(f"Error running script via command line: {e}")
             return False
     
+    def get_script_path(self):
+        """Get the full path to the installed video script."""
+        return self.reaper_scripts_path / "add_video_to_reaper.py"
+    
     def create_reaper_action(self):
-        """Create a custom REAPER action to run the video script."""
-        try:
-            # REAPER actions are stored in reaper-kb.ini
-            # We can create a custom action that runs our script
-            
-            actions_file = Path.home()
-            
-            if self.system == "Darwin":
-                actions_file = Path.home() / "Library" / "Application Support" / "REAPER" / "reaper-kb.ini"
-            elif self.system == "Windows":
-                actions_file = Path.home() / "AppData" / "Roaming" / "REAPER" / "reaper-kb.ini"
-            elif self.system == "Linux":
-                actions_file = Path.home() / ".config" / "REAPER" / "reaper-kb.ini"
-            
-            if not actions_file.exists():
-                app_logger.warning(f"Actions file not found: {actions_file}")
-                return False
-            
-            # Read existing actions
-            with open(actions_file, 'r') as f:
-                content = f.read()
-            
-            # Create custom action
-            script_path = self.reaper_scripts_path / "add_video_to_reaper.py"
-            action_line = f'CUSTOM_ACTION "Add Video to Project" "python {script_path}"\n'
-            
-            # Append to actions file if not already present
-            if "Add Video to Project" not in content:
-                with open(actions_file, 'a') as f:
-                    f.write(action_line)
-                
-                app_logger.info("Custom REAPER action created: Add Video to Project")
-                return True
-            
-            return True
-        
-        except Exception as e:
-            app_logger.error(f"Error creating REAPER action: {e}")
-            return False
+        """
+        Note: REAPER action registration is complex and requires manual setup.
+        Instead, we provide the script path for the user to create an action manually.
+        """
+        script_path = self.get_script_path()
+        app_logger.info(f"Video script available at: {script_path}")
+        app_logger.info("User can create a custom action in REAPER pointing to this script")
+        return True
     
     def get_setup_instructions(self):
         """Get instructions for manual setup."""

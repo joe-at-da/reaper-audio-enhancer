@@ -332,8 +332,12 @@ class MainWindow(QMainWindow):
     def import_to_reaper(self):
         """Open file dialog to select JSON export file and import to REAPER."""
         try:
+            # Default to export folder
+            export_dir = Path.home() / ".reaper_audio_enhancement" / "exports"
+            export_dir.mkdir(parents=True, exist_ok=True)
+            
             file_path, _ = QFileDialog.getOpenFileName(
-                self, "Select REAPER Export JSON File", "",
+                self, "Select REAPER Export JSON File", str(export_dir),
                 "JSON Files (*.json);;All Files (*)"
             )
             

@@ -67,7 +67,23 @@
     "detected": "Detected:",
     "confidence": "confidence",
     "suggestions": "suggestions",
-    "scene_type": "Scene"
+    "scene_type": "Scene",
+    "video_script_installed": "✅ Video script installed to REAPER Scripts folder!",
+    "video_import_options": "📹 To add video to your project:",
+    "video_option_1_title": "Option 1 (Automatic - Recommended):",
+    "video_option_1_step_1": "1. In REAPER: Actions > Show action list",
+    "video_option_1_step_2": "2. Search for: 'add_video_to_reaper'",
+    "video_option_1_step_3": "3. Click 'Run'",
+    "video_option_1_step_4": "4. Video will be added automatically!",
+    "video_option_2_title": "Option 2 (Manual):",
+    "video_option_2_step_1": "1. In REAPER: Insert > Media File",
+    "video_option_2_step_2": "2. Select: {path}",
+    "video_option_2_step_3": "3. View > Video Window (Cmd+Shift+V)",
+    "video_option_2_step_4": "4. Click Play",
+    "video_script_failed": "⚠️  Video script installation failed.",
+    "video_manual_add": "Please manually add video:",
+    "reaper_vlc_configured": "⚠️  REAPER was configured to use VLC.",
+    "reaper_restart_note": "Close and restart REAPER if video doesn't display."
   },
   "uk": {
     "app_title": "Інструмент покращення аудіо REAPER",
@@ -137,6 +153,22 @@
     "detected": "Виявлено:",
     "confidence": "впевненість",
     "suggestions": "пропозиції",
-    "scene_type": "Сцена"
+    "scene_type": "Сцена",
+    "video_script_installed": "✅ Скрипт відео встановлено в папку REAPER Scripts!",
+    "video_import_options": "📹 Щоб додати відео до вашого проекту:",
+    "video_option_1_title": "Варіант 1 (Автоматичний - Рекомендується):",
+    "video_option_1_step_1": "1. У REAPER: Actions > Show action list",
+    "video_option_1_step_2": "2. Пошук: 'add_video_to_reaper'",
+    "video_option_1_step_3": "3. Натисніть 'Run'",
+    "video_option_1_step_4": "4. Відео буде додано автоматично!",
+    "video_option_2_title": "Варіант 2 (Вручну):",
+    "video_option_2_step_1": "1. У REAPER: Insert > Media File",
+    "video_option_2_step_2": "2. Виберіть: {path}",
+    "video_option_2_step_3": "3. View > Video Window (Cmd+Shift+V)",
+    "video_option_2_step_4": "4. Натисніть Play",
+    "video_script_failed": "⚠️  Помилка встановлення скрипту відео.",
+    "video_manual_add": "Будь ласка, додайте відео вручну:",
+    "reaper_vlc_configured": "⚠️  REAPER було налаштовано для використання VLC.",
+    "reaper_restart_note": "Закрийте та перезавантажте REAPER, якщо відео не відображається."
   }
 }

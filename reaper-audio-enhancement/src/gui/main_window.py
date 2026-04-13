@@ -418,29 +418,38 @@ class MainWindow(QMainWindow):
             
             # Install video script
             video_installer = get_reaper_video_installer()
-            video_installer.install_video_script()
+            script_installed = video_installer.install_video_script()
             
             # Show success message with video import options
             success_title = self.localization.get("success_title")
             success_msg = self.localization.get("import_success")
             
-            success_msg += "\n\n📹 Video Import Options:\n\n"
-            success_msg += "Option 1 (Automatic - Recommended):\n"
-            success_msg += "1. In REAPER: Actions > Show action list\n"
-            success_msg += "2. Search for: 'add_video_to_reaper'\n"
-            success_msg += "3. Click 'Run'\n"
-            success_msg += "4. Video will be added automatically!\n\n"
-            
-            success_msg += "Option 2 (Manual):\n"
-            success_msg += "1. In REAPER: Insert > Media File\n"
-            success_msg += "2. Select: " + str(self.video_file) + "\n"
-            success_msg += "3. View > Video Window (Cmd+Shift+V)\n"
-            success_msg += "4. Click Play\n"
+            if script_installed:
+                success_msg += "\n\n" + self.localization.get("video_script_installed") + "\n\n"
+                success_msg += self.localization.get("video_import_options") + "\n\n"
+                success_msg += self.localization.get("video_option_1_title") + "\n"
+                success_msg += self.localization.get("video_option_1_step_1") + "\n"
+                success_msg += self.localization.get("video_option_1_step_2") + "\n"
+                success_msg += self.localization.get("video_option_1_step_3") + "\n"
+                success_msg += self.localization.get("video_option_1_step_4") + "\n\n"
+                
+                success_msg += self.localization.get("video_option_2_title") + "\n"
+                success_msg += self.localization.get("video_option_2_step_1") + "\n"
+                success_msg += self.localization.get("video_option_2_step_2").replace("{path}", str(self.video_file)) + "\n"
+                success_msg += self.localization.get("video_option_2_step_3") + "\n"
+                success_msg += self.localization.get("video_option_2_step_4") + "\n"
+            else:
+                success_msg += "\n\n" + self.localization.get("video_script_failed") + "\n"
+                success_msg += self.localization.get("video_manual_add") + "\n"
+                success_msg += self.localization.get("video_option_2_step_1") + "\n"
+                success_msg += self.localization.get("video_option_2_step_2").replace("{path}", str(self.video_file)) + "\n"
+                success_msg += self.localization.get("video_option_2_step_3") + "\n"
+                success_msg += self.localization.get("video_option_2_step_4") + "\n"
             
             # Add note about VLC if just configured
             if self.vlc_configured:
-                success_msg += "\n⚠️  REAPER was configured to use VLC.\n"
-                success_msg += "Close and restart REAPER if video doesn't display."
+                success_msg += "\n" + self.localization.get("reaper_vlc_configured") + "\n"
+                success_msg += self.localization.get("reaper_restart_note")
             
             QMessageBox.information(self, success_title, success_msg)
             

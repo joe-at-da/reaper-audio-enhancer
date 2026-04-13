@@ -1,8 +1,11 @@
 from PyQt5.QtWidgets import (QDialog, QVBoxLayout, QHBoxLayout, QLabel, 
                              QComboBox, QPushButton, QGroupBox, QLineEdit, QSpinBox)
 from PyQt5.QtCore import Qt, pyqtSignal
+from PyQt5.QtGui import QDesktopServices
+from PyQt5.QtCore import QUrl
 from src.localization import get_localization
 from src.utils import config
+from src.utils.vlc_detector import get_vlc_detector
 
 
 class SettingsDialog(QDialog):
@@ -76,6 +79,57 @@ class SettingsDialog(QDialog):
         
         reaper_group.setLayout(reaper_layout)
         layout.addWidget(reaper_group)
+        
+        # VLC settings group
+        vlc_group = QGroupBox(self.localization.get("vlc_title"))
+        vlc_layout = QVBoxLayout()
+        
+        # VLC status
+        vlc_detector = get_vlc_detector()
+        vlc_status_label = QLabel(self.localization.get("vlc_status") + ":")
+        
+        if vlc_detector.is_installed():
+            vlc_status_text = self.localization.get("vlc_installed")
+            vlc_path = vlc_detector.get_vlc_path()
+            vlc_status_value = QLabel(f"{vlc_status_text} ✓")
+            vlc_status_value.setStyleSheet("color: #51cf66;")
+        else:
+            vlc_status_text = self.localization.get("vlc_not_installed")
+            vlc_status_value = QLabel(vlc_status_text)
+            vlc_status_value.setStyleSheet("color: #ff6b6b;")
+        
+        vlc_status_layout = QHBoxLayout()
+        vlc_status_layout.addWidget(vlc_status_label)
+        vlc_status_layout.addWidget(vlc_status_value)
+        vlc_status_layout.addStretch()
+        vlc_layout.addLayout(vlc_status_layout)
+        
+        # VLC path input
+        vlc_path_layout = QHBoxLayout()
+        vlc_path_label = QLabel("VLC Path:")
+        self.vlc_path_input = QLineEdit()
+        self.vlc_path_input.setPlaceholderText(vlc_detector.get_vlc_path() or "Not found")
+        vlc_path_layout.addWidget(vlc_path_label)
+        vlc_path_layout.addWidget(self.vlc_path_input)
+        vlc_layout.addLayout(vlc_path_layout)
+        
+        # VLC download button (if not installed)
+        if not vlc_detector.is_installed():
+            vlc_button_layout = QHBoxLayout()
+            vlc_download_button = QPushButton(self.localization.get("vlc_download_link"))
+            vlc_download_button.clicked.connect(self.open_vlc_download)
+            vlc_button_layout.addWidget(vlc_download_button)
+            vlc_button_layout.addStretch()
+            vlc_layout.addLayout(vlc_button_layout)
+        
+        # VLC info
+        vlc_info_label = QLabel(self.localization.get("vlc_instructions"))
+        vlc_info_label.setStyleSheet("color: #888888; font-size: 9pt;")
+        vlc_info_label.setWordWrap(True)
+        vlc_layout.addWidget(vlc_info_label)
+        
+        vlc_group.setLayout(vlc_layout)
+        layout.addWidget(vlc_group)
         layout.addStretch()
         
         # Buttons
@@ -109,6 +163,11 @@ class SettingsDialog(QDialog):
         
         self.osc_host_input.setText(osc_host)
         self.osc_port_input.setValue(osc_port)
+        
+        # Load VLC path
+        vlc_detector = get_vlc_detector()
+        vlc_path = config.get("vlc_path", vlc_detector.get_vlc_path() or "")
+        self.vlc_path_input.setText(vlc_path)
     
     def save_settings(self):
         """Save settings to config."""
@@ -118,6 +177,11 @@ class SettingsDialog(QDialog):
         
         config.set("osc_host", osc_host)
         config.set("osc_port", osc_port)
+        
+        # Save VLC path
+        vlc_path = self.vlc_path_input.text().strip()
+        if vlc_path:
+            config.set("vlc_path", vlc_path)
     
     def accept(self):
         """Accept and save settings."""
@@ -134,3 +198,9 @@ class SettingsDialog(QDialog):
     def get_selected_language(self):
         """Get the selected language code."""
         return self.language_combo.currentData()
+    
+    def open_vlc_download(self):
+        """Open VLC download page in browser."""
+        vlc_detector = get_vlc_detector()
+        url = vlc_detector.get_installation_url()
+        QDesktopServices.openUrl(QUrl(url))

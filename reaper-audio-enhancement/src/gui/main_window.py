@@ -1,12 +1,11 @@
 import sys
+import subprocess
+import platform
 from pathlib import Path
-from PyQt5.QtWidgets import (
-    QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QPushButton,
-    QLabel, QFileDialog, QTabWidget, QProgressBar, QMessageBox,
-    QComboBox, QSlider, QSpinBox, QMenuBar, QMenu
-)
-from PyQt5.QtCore import Qt, QThread, pyqtSignal
+from PyQt5.QtWidgets import (QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QLabel, QPushButton,
+                             QFileDialog, QMessageBox, QProgressBar, QSlider)
 from PyQt5.QtGui import QFont
+from PyQt5.QtCore import Qt, QThread, pyqtSignal
 
 from src.utils import app_logger, config
 from src.audio import NoiseDetector, NoiseReducer, AudioSuggester
@@ -345,8 +344,6 @@ class MainWindow(QMainWindow):
                 return
             
             from src.reaper.reaper_importer import ReaperImporter
-            from src.reaper.osc_importer import OSCImporter
-            from src.reaper.reascript_importer import ReaScriptImporter
             
             # Load and validate JSON
             importer = ReaperImporter()
@@ -362,39 +359,43 @@ class MainWindow(QMainWindow):
                 QMessageBox.critical(self, error_msg, "Original audio file not found")
                 return
             
-            # Try OSC first
-            osc = OSCImporter()
-            if osc.connect():
-                export_data = importer.get_export_data()
-                if osc.import_from_data(export_data):
-                    success_title = self.localization.get("success_title")
-                    success_msg = self.localization.get("import_success")
-                    QMessageBox.information(self, success_title, success_msg)
-                    return
+            # Generate REAPER project file
+            project_path = importer.generate_project_file()
             
-            # Fall back to ReaScript
-            reascript = ReaScriptImporter()
-            script_path = reascript.save_reascript(importer.get_export_data())
-            
-            if script_path:
-                success_title = self.localization.get("success_title")
-                success_msg = (
-                    f"ReaScript generated successfully!\n\n"
-                    f"Script saved to:\n{script_path}\n\n"
-                    f"To import into REAPER:\n"
-                    f"1. Open REAPER\n"
-                    f"2. Go to: Actions > Show Console\n"
-                    f"3. Click 'Load' and select the script file\n"
-                    f"4. Click 'Run'"
-                )
-                QMessageBox.information(self, success_title, success_msg)
-            else:
+            if not project_path:
                 error_msg = self.localization.get("error_title")
-                QMessageBox.critical(self, error_msg, "Failed to generate ReaScript")
+                QMessageBox.critical(self, error_msg, "Failed to generate REAPER project file")
+                return
+            
+            # Show success message
+            success_title = self.localization.get("success_title")
+            success_msg = self.localization.get("import_success")
+            QMessageBox.information(self, success_title, success_msg)
+            
+            # Open REAPER with the project file
+            self._open_reaper_with_project(str(project_path))
         except Exception as e:
             error_msg = self.localization.get("error_title")
             QMessageBox.critical(self, error_msg, f"Error: {e}")
             app_logger.error(f"Import error: {e}")
+    
+    def _open_reaper_with_project(self, project_path):
+        """Open REAPER with the generated project file."""
+        try:
+            system = platform.system()
+            
+            if system == "Darwin":  # macOS
+                subprocess.Popen(["open", "-a", "REAPER", project_path])
+            elif system == "Windows":
+                subprocess.Popen(["reaper.exe", project_path])
+            elif system == "Linux":
+                subprocess.Popen(["reaper", project_path])
+            else:
+                app_logger.warning(f"Unknown platform: {system}")
+            
+            app_logger.info(f"Opening REAPER with project: {project_path}")
+        except Exception as e:
+            app_logger.error(f"Error opening REAPER: {e}")
     
     def create_menu_bar(self):
         """Create menu bar with Settings menu and language flags."""

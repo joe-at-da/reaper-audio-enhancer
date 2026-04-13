@@ -1,6 +1,7 @@
 import json
 from pathlib import Path
 from src.utils import app_logger
+from src.reaper.reaper_project_generator import ReaperProjectGenerator
 
 
 class ReaperImporter:
@@ -151,3 +152,20 @@ class ReaperImporter:
         processing = audio_track.get("processing", {})
         noise_reduction = processing.get("noise_reduction", {})
         return noise_reduction.get("strength", 0.5)
+    
+    def generate_project_file(self):
+        """
+        Generate a REAPER project file from loaded export data.
+        Returns path to the generated .rpp file.
+        """
+        if not self.export_data:
+            app_logger.error("No export data loaded")
+            return None
+        
+        try:
+            generator = ReaperProjectGenerator()
+            project_path = generator.generate_project(self.export_data)
+            return project_path
+        except Exception as e:
+            app_logger.error(f"Error generating project file: {e}")
+            return None

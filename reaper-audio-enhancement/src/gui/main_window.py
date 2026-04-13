@@ -8,6 +8,7 @@ from PyQt5.QtGui import QFont
 from PyQt5.QtCore import Qt, QThread, pyqtSignal
 
 from src.utils import app_logger, config
+from src.utils.reaper_config_writer import get_reaper_config_writer
 from src.audio import NoiseDetector, NoiseReducer, AudioSuggester
 from src.video import FrameExtractor, SceneDetector
 from src.reaper import ExportGenerator
@@ -88,6 +89,14 @@ class MainWindow(QMainWindow):
         self.video_file = None
         self.analysis_results = None
         self.demo_mode = demo_mode
+        
+        # Configure REAPER to use VLC for video playback
+        reaper_writer = get_reaper_config_writer()
+        vlc_configured = False
+        if reaper_writer.is_reaper_installed():
+            vlc_configured = reaper_writer.configure_vlc()
+        self.vlc_configured = vlc_configured
+        
         self.init_ui()
         self.create_menu_bar()
         
@@ -406,9 +415,18 @@ class MainWindow(QMainWindow):
                 QMessageBox.critical(self, error_msg, "Failed to generate REAPER project file")
                 return
             
-            # Show success message
+            # Show success message with VLC restart note
             success_title = self.localization.get("success_title")
             success_msg = self.localization.get("import_success")
+            
+            # Add note about restarting REAPER if VLC was just configured
+            if self.vlc_configured:
+                success_msg += "\n\n⚠️  IMPORTANT: REAPER has been configured to use VLC.\n"
+                success_msg += "Please close REAPER completely and restart it for video to display.\n"
+                success_msg += "Then open View > Video Window (Cmd+Shift+V) and click Play."
+            else:
+                success_msg += "\n\nTo view video: Open View > Video Window (Cmd+Shift+V) and click Play."
+            
             QMessageBox.information(self, success_title, success_msg)
             
             # Open REAPER with the project file

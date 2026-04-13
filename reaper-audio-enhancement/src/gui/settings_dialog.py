@@ -1,3 +1,4 @@
+import sys
 from PyQt5.QtWidgets import (QDialog, QVBoxLayout, QHBoxLayout, QLabel, 
                              QComboBox, QPushButton, QGroupBox, QLineEdit, QSpinBox)
 from PyQt5.QtCore import Qt, pyqtSignal
@@ -135,6 +136,9 @@ class SettingsDialog(QDialog):
         # Buttons
         button_layout = QHBoxLayout()
         
+        help_button = QPushButton("📖 Getting Started")
+        help_button.clicked.connect(self.open_getting_started)
+        
         ok_button = QPushButton("OK")
         ok_button.clicked.connect(self.accept)
         
@@ -142,6 +146,7 @@ class SettingsDialog(QDialog):
         cancel_button.setText("Cancel")
         cancel_button.clicked.connect(self.reject)
         
+        button_layout.addWidget(help_button)
         button_layout.addStretch()
         button_layout.addWidget(ok_button)
         button_layout.addWidget(cancel_button)
@@ -204,3 +209,35 @@ class SettingsDialog(QDialog):
         vlc_detector = get_vlc_detector()
         url = vlc_detector.get_installation_url()
         QDesktopServices.openUrl(QUrl(url))
+    
+    def open_getting_started(self):
+        """Open Getting Started guide in default text editor."""
+        from pathlib import Path
+        import subprocess
+        
+        # Get current language and select appropriate guide
+        current_lang = self.localization.get_current_language()
+        
+        if current_lang == "uk":
+            guide_file = "GETTING_STARTED_UK.md"
+        else:
+            guide_file = "GETTING_STARTED.md"
+        
+        docs_path = Path(__file__).parent.parent.parent / "docs" / guide_file
+        
+        if docs_path.exists():
+            try:
+                # Open with default application
+                if sys.platform == "darwin":  # macOS
+                    subprocess.Popen(["open", str(docs_path)])
+                elif sys.platform == "win32":  # Windows
+                    subprocess.Popen(["notepad", str(docs_path)])
+                else:  # Linux
+                    subprocess.Popen(["xdg-open", str(docs_path)])
+            except Exception as e:
+                from src.utils import app_logger
+                app_logger.error(f"Error opening Getting Started guide: {e}")
+        else:
+            from PyQt5.QtWidgets import QMessageBox
+            QMessageBox.warning(self, "File Not Found", 
+                              f"Getting Started guide not found at:\n{docs_path}")

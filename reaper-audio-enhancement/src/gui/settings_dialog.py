@@ -118,7 +118,6 @@ class SettingsDialog(QDialog):
         
         config.set("osc_host", osc_host)
         config.set("osc_port", osc_port)
-        config.save()
     
     def accept(self):
         """Accept and save settings."""

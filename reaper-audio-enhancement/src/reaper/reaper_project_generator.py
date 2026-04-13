@@ -145,27 +145,51 @@ class ReaperProjectGenerator:
         lines.append(f"    CSURF 0 0 0")
         lines.append(f"    TRACKHEIGHT 0 0 0")
         lines.append(f"    INQ 0 0 0 0.5 100 0 0 100")
-        lines.append(f"    NCHAN 0")
+        lines.append(f"    NCHAN 2")
         lines.append(f"    FX 0")
         lines.append(f"    AUXFLAGS 0")
         
-        # Add media item
+        # Add media item with VIDEO source
         if file_path:
+            # Get video duration
+            duration = self._get_video_duration(file_path)
+            
             lines.append(f"    <ITEM")
             lines.append(f"      POSITION 0")
             lines.append(f"      SNAPOFFS 0")
-            lines.append(f"      LENGTH 10")
+            lines.append(f"      LENGTH {duration}")
             lines.append(f"      BASE_PITCH 1")
             lines.append(f"      PLAYRATE 1")
             lines.append(f"      CHANMODE 0")
             lines.append(f"      GUID {self._generate_guid()}")
-            lines.append(f"      <SOURCE WAVE")
+            lines.append(f"      <SOURCE VIDEOFILE")
             lines.append(f"        FILE \"{file_path}\"")
             lines.append(f"      >")
             lines.append(f"    >")
         
         lines.append(f"  >")
         return lines
+    
+    def _get_video_duration(self, file_path):
+        """Get video duration in seconds."""
+        try:
+            import subprocess
+            result = subprocess.run(
+                ['ffprobe', '-v', 'error', '-show_entries', 'format=duration', 
+                 '-of', 'default=noprint_wrappers=1:nokey=1:noprint_wrappers=1', 
+                 str(file_path)],
+                capture_output=True,
+                text=True,
+                timeout=5
+            )
+            if result.returncode == 0:
+                duration = float(result.stdout.strip())
+                return duration
+        except Exception as e:
+            app_logger.debug(f"Could not get video duration: {e}")
+        
+        # Default to 20 seconds if we can't get duration
+        return 20.0
     
     def _generate_guid(self):
         """Generate a simple GUID for track items."""

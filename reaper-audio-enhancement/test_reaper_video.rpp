@@ -1,0 +1,38 @@
+<REAPER_PROJECT 0.1 "6.82" 1629820800
+  SAMPLERATE 44100 5 2
+  TEMPO 120 4 4
+  PLAYRATE 1 0 0.25 8
+  CURSOR 0
+  SELECTION 0 0
+  ZOOM 6.41 0 0
+  VZOOM 0 0
+  MASTER_VOLUME 1.0 0 -1 -1 1
+  MASTER_FX 0
+  MASTER_SEL 0
+
+  <TRACK 1
+    NAME "Video Track"
+    VOLPAN 1 0 -1 -1 1
+    MUTESOLO 0 0 0
+    IPHASE 0
+    PLAYOFFS 0 1
+    CSURF 0 0 0
+    TRACKHEIGHT 0 0 0
+    INQ 0 0 0 0.5 100 0 0 100
+    NCHAN 2
+    FX 0
+    AUXFLAGS 0
+    <ITEM
+      POSITION 0
+      SNAPOFFS 0
+      LENGTH 20
+      BASE_PITCH 1
+      PLAYRATE 1
+      CHANMODE 0
+      GUID 12345678901234567890123456789012
+      <SOURCE VIDEOFILE
+        FILE "/Users/joebradley/Projects/ihor-audio-main/reaper-audio-enhancement/assets/sample_files/sample_video.mp4"
+      >
+    >
+  >
+>

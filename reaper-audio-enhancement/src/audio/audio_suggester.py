@@ -7,11 +7,16 @@ class AudioSuggester:
         self.audio_library_path = Path(config.get("audio_library_path"))
         
         self.scene_audio_map = {
+            # ML classifier scene types
+            "rain": ["rain.wav"],
+            "car": ["car_honk.wav"],
+            "snow": ["ambient_nature.wav"],
+            # Legacy scene types (fallback)
             "storm": ["thunder.wav", "rain.wav", "wind.wav"],
-            "car_ride": ["car_engine.wav", "wind.wav"],
+            "car_ride": ["car_honk.wav", "wind.wav"],
             "outdoor": ["wind.wav", "ambient_nature.wav"],
             "indoor": ["ambient_nature.wav"],
-            "traffic": ["car_engine.wav"],
+            "traffic": ["car_honk.wav"],
         }
     
     def get_available_audio_files(self):

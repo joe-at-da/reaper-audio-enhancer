@@ -13,10 +13,11 @@ class SceneDetector:
             "quiet",
         ]
     
-    def detect_scenes(self, video_path, interval=1.0):
+    def detect_scenes(self, video_path, interval=1.0, change_threshold=0.30):
         """
-        Detect scene types from video at regular intervals.
-        Returns list of (timestamp, scene_type, confidence) tuples.
+        Detect scene changes from video using frame-to-frame comparison.
+        Only flags significant changes (default 30%+ difference).
+        Returns list of (timestamp, scene_type, confidence) tuples for actual scene changes.
         """
         try:
             cap = cv2.VideoCapture(str(video_path))
@@ -30,6 +31,8 @@ class SceneDetector:
             
             detected_scenes = []
             frame_count = 0
+            prev_frame = None
+            prev_scene_type = None
             
             while True:
                 ret, frame = cap.read()
@@ -40,18 +43,41 @@ class SceneDetector:
                     timestamp = frame_count / fps
                     scene_type, confidence = self._analyze_frame(frame)
                     
-                    detected_scenes.append({
-                        "timestamp": timestamp,
-                        "scene_type": scene_type,
-                        "confidence": confidence,
-                    })
+                    # Check if this is a scene change (not just a frame classification)
+                    is_scene_change = False
+                    
+                    if prev_frame is None:
+                        # First frame is always a scene
+                        is_scene_change = True
+                    elif scene_type != prev_scene_type:
+                        # Scene type changed - check if it's significant
+                        frame_diff = self._calculate_frame_difference(prev_frame, frame)
+                        if frame_diff > change_threshold:
+                            is_scene_change = True
+                            app_logger.debug(f"Scene change detected at {timestamp}s: {prev_scene_type} → {scene_type} (diff: {frame_diff:.2%})")
+                    
+                    if is_scene_change:
+                        detected_scenes.append({
+                            "timestamp": timestamp,
+                            "scene_type": scene_type,
+                            "confidence": confidence,
+                        })
+                    
+                    prev_frame = frame.copy()
+                    prev_scene_type = scene_type
                 
                 frame_count += 1
             
             cap.release()
             
-            app_logger.info(f"Detected {len(detected_scenes)} scenes from video")
-            return detected_scenes
+            # Merge identical consecutive scenes
+            merged_scenes = self._merge_identical_scenes(detected_scenes)
+            
+            app_logger.info(f"Detected {len(merged_scenes)} scene changes from video (threshold: {change_threshold:.0%})")
+            for scene in merged_scenes:
+                app_logger.info(f"  - {scene['scene_type']} at {scene['timestamp']:.1f}s (confidence: {scene['confidence']:.2f})")
+            
+            return merged_scenes
         except Exception as e:
             app_logger.error(f"Error detecting scenes: {e}")
             return []
@@ -108,6 +134,75 @@ class SceneDetector:
         except Exception as e:
             app_logger.error(f"Error analyzing frame: {e}")
             return "outdoor", 0.4
+    
+    def _calculate_frame_difference(self, frame1, frame2):
+        """
+        Calculate the difference between two frames using histogram comparison.
+        Returns a value between 0 and 1 (0 = identical, 1 = completely different).
+        """
+        try:
+            # Convert to grayscale
+            gray1 = cv2.cvtColor(frame1, cv2.COLOR_BGR2GRAY)
+            gray2 = cv2.cvtColor(frame2, cv2.COLOR_BGR2GRAY)
+            
+            # Calculate histograms
+            hist1 = cv2.calcHist([gray1], [0], None, [256], [0, 256])
+            hist2 = cv2.calcHist([gray2], [0], None, [256], [0, 256])
+            
+            # Normalize histograms
+            hist1 = cv2.normalize(hist1, hist1).flatten()
+            hist2 = cv2.normalize(hist2, hist2).flatten()
+            
+            # Compare using chi-square distance
+            diff = cv2.compareHist(hist1, hist2, cv2.HISTCMP_CHISQR)
+            
+            # Normalize to 0-1 range (chi-square can be large)
+            # Empirically, significant changes are > 0.3 in normalized space
+            normalized_diff = min(diff / 10.0, 1.0)
+            
+            return normalized_diff
+        except Exception as e:
+            app_logger.debug(f"Error calculating frame difference: {e}")
+            return 0.0
+    
+    def _merge_identical_scenes(self, detected_scenes):
+        """
+        Merge consecutive scenes of the same type into a single scene.
+        Keeps the first occurrence and averages confidence.
+        """
+        try:
+            if not detected_scenes:
+                return []
+            
+            merged = []
+            current_group = [detected_scenes[0]]
+            
+            for scene in detected_scenes[1:]:
+                if scene["scene_type"] == current_group[0]["scene_type"]:
+                    # Same scene type, add to group
+                    current_group.append(scene)
+                else:
+                    # Different scene type, finalize current group
+                    merged_scene = {
+                        "timestamp": current_group[0]["timestamp"],
+                        "scene_type": current_group[0]["scene_type"],
+                        "confidence": np.mean([s["confidence"] for s in current_group]),
+                    }
+                    merged.append(merged_scene)
+                    current_group = [scene]
+            
+            # Don't forget the last group
+            merged_scene = {
+                "timestamp": current_group[0]["timestamp"],
+                "scene_type": current_group[0]["scene_type"],
+                "confidence": np.mean([s["confidence"] for s in current_group]),
+            }
+            merged.append(merged_scene)
+            
+            return merged
+        except Exception as e:
+            app_logger.error(f"Error merging scenes: {e}")
+            return detected_scenes
     
     def get_dominant_scene(self, detected_scenes):
         """

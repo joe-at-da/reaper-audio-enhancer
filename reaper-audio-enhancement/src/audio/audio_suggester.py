@@ -45,6 +45,7 @@ class AudioSuggester:
         """
         Suggest audio files based on detected scenes.
         detected_scenes: list of (scene_type, confidence) tuples
+        Deduplicates suggestions by (audio_file, start_time) to avoid duplicate tracks.
         """
         try:
             suggestions = []
@@ -53,7 +54,11 @@ class AudioSuggester:
             for scene_type, confidence in detected_scenes:
                 if scene_type in self.scene_audio_map:
                     audio_files = available_files.get(scene_type, [])
-                    for audio_file in audio_files:
+                    # For each scene, suggest only the best audio file (highest confidence)
+                    # instead of all available files for that scene type
+                    if audio_files:
+                        # Pick the first (best) audio file for this scene
+                        audio_file = audio_files[0]
                         suggestions.append({
                             "scene": scene_type,
                             "confidence": confidence,
@@ -65,13 +70,43 @@ class AudioSuggester:
                             "priority": confidence,
                         })
             
-            suggestions.sort(key=lambda x: x["priority"], reverse=True)
+            # Deduplicate by (audio_file, scene_type) - keep highest confidence
+            deduplicated = self._deduplicate_suggestions(suggestions)
+            deduplicated.sort(key=lambda x: x["priority"], reverse=True)
             
-            app_logger.info(f"Generated {len(suggestions)} audio suggestions")
-            return suggestions
+            app_logger.info(f"Generated {len(deduplicated)} audio suggestions (after deduplication)")
+            return deduplicated
         except Exception as e:
             app_logger.error(f"Error suggesting audio: {e}")
             return []
+    
+    def _deduplicate_suggestions(self, suggestions):
+        """
+        Remove duplicate suggestions by (audio_file, scene_type).
+        Keeps the suggestion with highest confidence.
+        """
+        try:
+            seen = {}
+            deduplicated = []
+            
+            for suggestion in suggestions:
+                key = (suggestion["audio_file"], suggestion["scene"])
+                
+                if key not in seen:
+                    seen[key] = suggestion
+                    deduplicated.append(suggestion)
+                else:
+                    # Keep the one with higher confidence
+                    if suggestion["confidence"] > seen[key]["confidence"]:
+                        # Replace with higher confidence version
+                        deduplicated.remove(seen[key])
+                        seen[key] = suggestion
+                        deduplicated.append(suggestion)
+            
+            return deduplicated
+        except Exception as e:
+            app_logger.error(f"Error deduplicating suggestions: {e}")
+            return suggestions
     
     def create_fade_envelope(self, duration, fade_in=0.5, fade_out=0.5, sr=22050):
         """

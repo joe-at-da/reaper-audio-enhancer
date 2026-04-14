@@ -136,20 +136,19 @@ class SettingsDialog(QDialog):
         # Buttons
         button_layout = QHBoxLayout()
         
-        help_button = QPushButton("📖 Getting Started")
-        help_button.clicked.connect(self.open_getting_started)
+        self.help_button = QPushButton(self.localization.get("getting_started_button"))
+        self.help_button.clicked.connect(self.open_getting_started)
         
-        ok_button = QPushButton("OK")
-        ok_button.clicked.connect(self.accept)
+        self.ok_button = QPushButton(self.localization.get("ok_button"))
+        self.ok_button.clicked.connect(self.accept)
         
-        cancel_button = QPushButton(self.localization.get("english"))  # Reuse for cancel
-        cancel_button.setText("Cancel")
-        cancel_button.clicked.connect(self.reject)
+        self.cancel_button = QPushButton(self.localization.get("cancel_button"))
+        self.cancel_button.clicked.connect(self.reject)
         
-        button_layout.addWidget(help_button)
+        button_layout.addWidget(self.help_button)
         button_layout.addStretch()
-        button_layout.addWidget(ok_button)
-        button_layout.addWidget(cancel_button)
+        button_layout.addWidget(self.ok_button)
+        button_layout.addWidget(self.cancel_button)
         
         layout.addLayout(button_layout)
         
@@ -206,6 +205,11 @@ class SettingsDialog(QDialog):
         try:
             # Update window title
             self.setWindowTitle(self.localization.get("settings_menu"))
+            
+            # Update button text
+            self.help_button.setText(self.localization.get("getting_started_button"))
+            self.ok_button.setText(self.localization.get("ok_button"))
+            self.cancel_button.setText(self.localization.get("cancel_button"))
             
             # Update group box titles
             # Language group is already updated via combo box

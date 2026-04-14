@@ -39,18 +39,18 @@ class ExportGenerator:
             }
             
             for i, suggestion in enumerate(project_data.get("suggestions", [])):
-                if suggestion.get("accepted", False):
-                    track = {
-                        "name": f"Enhancement - {suggestion['scene']}",
-                        "type": "audio",
-                        "file": suggestion.get("audio_path"),
-                        "start_time": suggestion.get("start_time", 0),
-                        "duration": suggestion.get("duration"),
-                        "volume": 1.0 - suggestion.get("volume_reduction", 0.3),
-                        "fade_in": suggestion.get("fade_in", 0.5),
-                        "fade_out": suggestion.get("fade_out", 0.5),
-                    }
-                    export_data["enhancement_tracks"].append(track)
+                # Include all suggestions as enhancement tracks (not just accepted ones)
+                track = {
+                    "name": f"Enhancement - {suggestion.get('scene', 'Unknown')} ({suggestion.get('audio_file', 'Unknown')})",
+                    "type": "audio",
+                    "file": suggestion.get("audio_path"),
+                    "start_time": suggestion.get("start_time", 0),
+                    "duration": suggestion.get("duration"),
+                    "volume": 1.0 - suggestion.get("volume_reduction", 0.3),
+                    "fade_in": suggestion.get("fade_in", 0.5),
+                    "fade_out": suggestion.get("fade_out", 0.5),
+                }
+                export_data["enhancement_tracks"].append(track)
             
             filename = f"export_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
             export_path = self.export_dir / filename

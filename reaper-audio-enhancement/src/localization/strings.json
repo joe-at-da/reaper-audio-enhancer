@@ -3,7 +3,7 @@
     "app_title": "REAPER Audio Enhancement Tool",
     "app_subtitle": "Audio Enhancement for REAPER",
     "welcome_title": "Welcome to the REAPER Audio Enhancement Tool!",
-    "welcome_text": "This tool helps you improve audio quality by:\n• Detecting and reducing background noise\n• Analyzing video to understand the scene context\n• Suggesting contextual ambient sounds to enhance your audio\n• Creating separate audio and video tracks in REAPER",
+    "welcome_text": "This tool helps you improve audio quality by:\n• Detecting and reducing background noise\n• Analyzing video to understand scene context\n• Suggesting contextual ambient sounds to enhance your audio\n• Creating separate audio and video tracks in REAPER\n\nWhen you import to REAPER, you'll get:\n• 1 Original Audio track (your input audio)\n• 1 Video track (if video was selected)\n• Multiple Enhancement tracks (one for each suggested ambient sound)\n\nEach enhancement track contains an ambient sound that matches the detected scene. You can mute, adjust volume, or delete any tracks you don't want.",
     "quick_start_title": "Quick Start:",
     "quick_start_steps": "1. Select an audio file (required)\n2. Select a video file (optional, for scene detection)\n3. Click 'Analyze' to detect noise and scenes\n4. Review suggestions and adjust noise reduction strength\n5. Click 'Process Audio' to reduce noise or 'Export to REAPER' to create tracks",
     "audio_file_label": "Audio File:",
@@ -83,13 +83,16 @@
     "video_script_failed": "⚠️  Video script installation failed.",
     "video_manual_add": "Please manually add video:",
     "reaper_vlc_configured": "⚠️  REAPER was configured to use VLC.",
-    "reaper_restart_note": "Close and restart REAPER if video doesn't display."
+    "reaper_restart_note": "Close and restart REAPER if video doesn't display.",
+    "getting_started_button": "📖 Getting Started",
+    "ok_button": "OK",
+    "cancel_button": "Cancel"
   },
   "uk": {
     "app_title": "Інструмент покращення аудіо REAPER",
     "app_subtitle": "Покращення аудіо для REAPER",
     "welcome_title": "Ласкаво просимо до інструменту покращення аудіо REAPER!",
-    "welcome_text": "Цей інструмент допомагає покращити якість аудіо:\n• Виявлення та зменшення фонового шуму\n• Аналіз відео для розуміння контексту сцени\n• Пропозиція контекстного оточуючого звуку для покращення вашого аудіо\n• Створення окремих доріжок аудіо та відео в REAPER",
+    "welcome_text": "Цей інструмент допомагає покращити якість аудіо:\n• Виявлення та зменшення фонового шуму\n• Аналіз відео для розуміння контексту сцени\n• Пропозиція контекстного оточуючого звуку для покращення вашого аудіо\n• Створення окремих доріжок аудіо та відео в REAPER\n\nКоли ви імпортуєте в REAPER, ви отримаєте:\n• 1 доріжку оригінального аудіо (ваше вхідне аудіо)\n• 1 доріжку відео (якщо було вибрано відео)\n• Кілька доріжок покращення (по одній для кожного запропонованого оточуючого звуку)\n\nКожна доріжка покращення містить оточуючий звук, який відповідає виявленій сцені. Ви можете вимкнути, відрегулювати гучність або видалити будь-які доріжки, які ви не хочете.",
     "quick_start_title": "Швидкий старт:",
     "quick_start_steps": "1. Виберіть аудіо файл (обов'язково)\n2. Виберіть відео файл (опціонально, для виявлення сцени)\n3. Натисніть 'Аналізувати' для виявлення шуму та сцен\n4. Перегляньте пропозиції та відрегулюйте силу зменшення шуму\n5. Натисніть 'Обробити аудіо' для зменшення шуму або 'Експортувати в REAPER' для створення доріжок",
     "audio_file_label": "Аудіо файл:",
@@ -169,6 +172,9 @@
     "video_script_failed": "⚠️  Помилка встановлення скрипту відео.",
     "video_manual_add": "Будь ласка, додайте відео вручну:",
     "reaper_vlc_configured": "⚠️  REAPER було налаштовано для використання VLC.",
-    "reaper_restart_note": "Закрийте та перезавантажте REAPER, якщо відео не відображається."
+    "reaper_restart_note": "Закрийте та перезавантажте REAPER, якщо відео не відображається.",
+    "getting_started_button": "📖 Початок роботи",
+    "ok_button": "OK",
+    "cancel_button": "Скасувати"
   }
 }

@@ -1,21 +1,22 @@
 # Next Steps - Audio Library & Video Automation
 
-## 1. ✅ AUTOMATIC VIDEO IMPORT (SOLVED)
+## 1. ✅ VIDEO IMPORT (MANUAL - CONTROLLED)
 
-### What Was Done
-- Created `__startup.lua` in REAPER Scripts folder
-- This script runs automatically when REAPER starts
-- It will automatically run the video import script on project load
+### How It Works
+Video import is available as a manual action in REAPER:
 
-**Location**: `~/Library/Application Support/REAPER/Scripts/__startup.lua`
+**To Add Video to Your Project:**
+1. In REAPER: **Actions > Show action list**
+2. Search for: **add_video_to_reaper**
+3. Click **Run**
+4. Video will be added to your project automatically
 
-**How It Works**:
-1. REAPER launches
-2. `__startup.lua` runs automatically (REAPER native feature)
-3. Checks for `add_video_to_reaper.lua` script
-4. Runs it automatically to add video to project
+**Why Manual?**
+- Prevents duplicate video tracks
+- Gives you control over when video is added
+- Avoids aggressive automation that creates multiple tracks
 
-**No More Manual Steps!** Video will be added automatically when you open the project.
+**Location of Script**: `~/Library/Application Support/REAPER/Scripts/add_video_to_reaper.lua`
 
 ---
 

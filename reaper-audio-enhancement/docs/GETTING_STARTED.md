@@ -11,9 +11,19 @@ This tool helps you improve audio quality by:
 ## Step-by-Step Guide
 
 ### 1. Launch the App
+
+**Demo Mode** (with sample files pre-loaded):
 ```bash
-bash launch.sh demo
+bash launch.sh demo_snow    # Snowstorm video + audio
+bash launch.sh demo_rain    # Rain video + audio
+bash launch.sh demo_car     # Car video + audio
 ```
+
+**Normal Mode** (select your own files):
+```bash
+bash launch.sh
+```
+
 Or use the GUI launcher if available.
 
 ### 2. Select Your Files
@@ -51,19 +61,22 @@ Or use the GUI launcher if available.
 ### 6. Import to REAPER
 - Click **"4. Import to REAPER"**
 - REAPER will open with your project
-- You'll see a success message with instructions
+- Video will be added automatically (if OSC is enabled) ✅
 
-### 7. Add Video (If You Selected a Video File)
+### 7. Add Video (Automatic or Manual)
 
-**Option A: Automatic (Recommended)**
-1. In REAPER: **Actions > Show action list**
-2. Click **"Load ReaScript..."**
-3. Navigate to: `~/Library/Application Support/REAPER/Scripts/add_video_to_reaper.lua`
-4. Click **Open**
-5. Click **Run**
-6. Video track will be created automatically!
+**Option A: Automatic via OSC (Recommended)** ✅
+- If you've set up OSC automation (see `OSC_AUTOMATION_SETUP.md`):
+  - Video will be added automatically when REAPER opens
+  - No manual steps required!
 
 **Option B: Manual**
+1. In REAPER: **Actions > Show action list**
+2. Search for: **"Add Video to Project"**
+3. Click **Run**
+4. Video track will be created!
+
+**Option C: Insert Media File**
 1. In REAPER: **Insert > Media File**
 2. Select your video file
 3. Click **View > Video Window** (Cmd+Shift+V)
@@ -102,10 +115,12 @@ Or use the GUI launcher if available.
 - **0.5**: Moderate noise reduction (recommended)
 - **1.0**: Maximum noise reduction (may remove some audio detail)
 
-### Multiple Suggestions
-- The app suggests up to 13 different ambient sounds
+### Scene Detection & Suggestions
+- The app detects scenes in your video (e.g., rain, car, outdoor)
+- For each scene, it suggests matching ambient sounds
 - Each suggestion is on a separate REAPER track
 - Mute or adjust volume of any track you don't want
+- **Smart deduplication**: No duplicate suggestions for the same scene
 
 ### Exporting Your Work
 - Use REAPER's export features to save your final mix
@@ -150,9 +165,39 @@ Or use the GUI launcher if available.
   - add_video_to_reaper.lua
 ```
 
+## Demo Modes
+
+Test the tool with pre-loaded sample files:
+
+```bash
+bash launch.sh demo_snow   # Snowstorm video + audio
+bash launch.sh demo_rain   # Rain video + audio
+bash launch.sh demo_car    # Car video + audio
+```
+
+Each demo mode includes:
+- Pre-selected video and audio files
+- Matching audio suggestions
+- Ready to analyze, process, and export
+
+See `DEMO_MODES_SETUP.md` for details.
+
+## OSC Automation Setup
+
+Enable automatic video addition to REAPER projects:
+
+1. Edit REAPER configuration file
+2. Enable OSC in REAPER preferences
+3. Restart REAPER
+
+See `OSC_AUTOMATION_SETUP.md` for step-by-step instructions.
+
 ## Need Help?
 
 See the other documentation files:
+- `DEMO_MODES_SETUP.md` - Demo modes explained
+- `OSC_AUTOMATION_SETUP.md` - Automatic video addition
+- `SCENE_DETECTION_IMPROVEMENTS.md` - How scene detection works
 - `VLC_SETUP.md` - VLC installation and configuration
 - `FINAL_STATUS.md` - Complete technical details
 - `FINAL_VIDEO_SOLUTION.md` - Video integration explained

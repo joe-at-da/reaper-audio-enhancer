@@ -1,6 +1,7 @@
 import sys
 import subprocess
 import platform
+import time
 from pathlib import Path
 from PyQt5.QtWidgets import (QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QLabel, QPushButton,
                              QFileDialog, QMessageBox, QProgressBar, QSlider)
@@ -9,6 +10,7 @@ from PyQt5.QtCore import Qt, QThread, pyqtSignal
 
 from src.utils import app_logger, config
 from src.utils.reaper_config_writer import get_reaper_config_writer
+from src.utils.osc_client import get_osc_client
 from src.reaper.reaper_video_installer import get_reaper_video_installer
 from src.audio import NoiseDetector, NoiseReducer, AudioSuggester
 from src.video import FrameExtractor, SceneDetector
@@ -478,7 +480,7 @@ class MainWindow(QMainWindow):
             app_logger.error(f"Import error: {e}")
     
     def _open_reaper_with_project(self, project_path):
-        """Open REAPER with the generated project file."""
+        """Open REAPER with the generated project file and trigger video import via OSC."""
         try:
             system = platform.system()
             
@@ -492,6 +494,11 @@ class MainWindow(QMainWindow):
                 app_logger.warning(f"Unknown platform: {system}")
             
             app_logger.info(f"Opening REAPER with project: {project_path}")
+            
+            # Try to send OSC command to add video automatically
+            # Wait 3 seconds for REAPER to load the project
+            osc_client = get_osc_client()
+            osc_client.send_add_video_command(wait_ms=3000)
         except Exception as e:
             app_logger.error(f"Error opening REAPER: {e}")
     

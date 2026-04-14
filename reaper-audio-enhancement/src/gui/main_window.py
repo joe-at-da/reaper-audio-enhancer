@@ -416,8 +416,8 @@ class MainWindow(QMainWindow):
                 QMessageBox.critical(self, error_msg, "Failed to generate REAPER project file")
                 return
             
-            # Install video script and register as REAPER action
-            video_installer = get_reaper_video_installer()
+            # Install video script with the video file path
+            video_installer = get_reaper_video_installer(self.video_file)
             script_installed = video_installer.install_video_script()
             if script_installed:
                 video_installer.create_reaper_action()

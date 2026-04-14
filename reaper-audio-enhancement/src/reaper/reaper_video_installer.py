@@ -12,9 +12,10 @@ from src.utils import app_logger
 class ReaperVideoInstaller:
     """Install and run video import ReaScript in REAPER."""
     
-    def __init__(self):
+    def __init__(self, video_file=None):
         self.system = platform.system()
         self.reaper_scripts_path = self._get_reaper_scripts_path()
+        self.video_file = video_file
     
     def _get_reaper_scripts_path(self):
         """Get REAPER Scripts folder path."""
@@ -53,7 +54,8 @@ class ReaperVideoInstaller:
     
     def _create_lua_script(self):
         """Create Lua ReaScript for adding video to REAPER."""
-        video_file = "/Users/joebradley/Projects/ihor-audio-main/reaper-audio-enhancement/assets/sample_files/sample_video.mp4"
+        # Use provided video file or default
+        video_file = self.video_file or "/Users/joebradley/Projects/ihor-audio-main/reaper-audio-enhancement/assets/sample_files/sample_video.mp4"
         
         return f"""-- REAPER ReaScript: Add Video to Project
 -- This script adds a video file to the current REAPER project
@@ -208,9 +210,12 @@ reaper.ShowMessageBox(
 # Global instance
 _reaper_video_installer = None
 
-def get_reaper_video_installer():
+def get_reaper_video_installer(video_file=None):
     """Get or create global REAPER video installer instance."""
     global _reaper_video_installer
+    # Create new instance with video file if provided, otherwise use global
+    if video_file:
+        return ReaperVideoInstaller(video_file)
     if _reaper_video_installer is None:
         _reaper_video_installer = ReaperVideoInstaller()
     return _reaper_video_installer

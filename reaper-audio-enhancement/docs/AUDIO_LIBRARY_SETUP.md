@@ -68,12 +68,22 @@ print(status)
 3. Restart application
 4. Library is automatically detected
 
-### Recommended Sources
+### Recommended Sources with Direct Download Links
+
+**Mixkit.co** (Recommended - No registration required)
+- URL: https://mixkit.co/free-sound-effects/
+- License: Free to use
+- Rain sounds: https://mixkit.co/free-sound-effects/rain/
+- Thunder sounds: https://mixkit.co/free-sound-effects/thunder/
+- Wind sounds: https://mixkit.co/free-sound-effects/wind/
+- Ambient sounds: https://mixkit.co/free-sound-effects/ambient/
+- Car sounds: https://mixkit.co/free-sound-effects/car/
 
 **Freesound.org**
 - URL: https://freesound.org
-- License: Creative Commons
+- License: Creative Commons (check individual licenses)
 - Search: "wind", "rain", "thunder", "snow", "ambient"
+- Note: Requires free account to download
 
 **Pixabay.com**
 - URL: https://pixabay.com/sound-effects
@@ -90,9 +100,26 @@ print(status)
 ## Adding Custom Sounds
 
 ### Step 1: Download Audio Files
-1. Visit one of the recommended sources
-2. Search for desired sounds
-3. Download in WAV format (recommended)
+
+**Quick Start (Mixkit - Easiest)**:
+1. Go to: https://mixkit.co/free-sound-effects/rain/
+2. Click on a rain sound you like
+3. Click "Download" button (no registration needed)
+4. Repeat for: thunder, wind, car engine, ambient sounds
+5. Files will be downloaded as `.wav` files
+
+**Alternative (Freesound)**:
+1. Create free account at https://freesound.org
+2. Search for: "wind", "rain", "thunder", "car engine", "ambient"
+3. Download sounds in WAV format
+4. Check license is Creative Commons (free to use)
+
+**Recommended Sounds to Download**:
+- **Rain**: Heavy rain, light rain, rain on window
+- **Thunder**: Thunder rumble, thunder strike, thunderstorm
+- **Wind**: Wind howling, strong wind, gentle breeze
+- **Car Engine**: Car driving, car engine, traffic
+- **Ambient**: Forest ambience, nature sounds, urban ambience
 
 ### Step 2: Place Files
 1. Copy audio files to: `assets/audio_library/`

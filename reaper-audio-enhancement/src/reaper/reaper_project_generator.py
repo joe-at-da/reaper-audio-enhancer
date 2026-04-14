@@ -66,12 +66,16 @@ class ReaperProjectGenerator:
             ))
             track_index += 1
         
-        # Note: Video tracks are not supported in REAPER .rpp format
-        # Users must add video manually via: Insert > Media File
-        # Store video file path for reference
-        video_file = export_data.get("video_track", {}).get("file")
-        if video_file:
-            app_logger.info(f"Video file available (add manually in REAPER): {video_file}")
+        # Add video track (muted so only enhancement audio plays)
+        video_track = export_data.get("video_track", {})
+        if video_track.get("file"):
+            lines.extend(self._create_video_track(
+                track_index,
+                video_track.get("name", "Video"),
+                video_track.get("file")
+            ))
+            track_index += 1
+            app_logger.info(f"Video track added to project: {video_track.get('file')}")
         
         # Add enhancement tracks
         for track_info in export_data.get("enhancement_tracks", []):

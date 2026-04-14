@@ -198,7 +198,30 @@ class SettingsDialog(QDialog):
         lang_code = self.language_combo.currentData()
         if lang_code:
             self.localization.set_language(lang_code)
+            self.refresh_ui()
             self.language_changed.emit(lang_code)
+    
+    def refresh_ui(self):
+        """Refresh UI with new language."""
+        try:
+            # Update window title
+            self.setWindowTitle(self.localization.get("settings_menu"))
+            
+            # Update group box titles
+            # Language group is already updated via combo box
+            
+            # Update REAPER group info
+            reaper_info = self.findChild(type(self), "reaper_info")
+            if reaper_info:
+                reaper_info.setText("Configure REAPER OSC connection settings.\nDefault: 127.0.0.1:9000")
+            
+            # Update VLC group title and info
+            vlc_info_label = self.findChild(type(self), "vlc_info")
+            if vlc_info_label:
+                vlc_info_label.setText(self.localization.get("vlc_instructions"))
+        except Exception as e:
+            from src.utils import app_logger
+            app_logger.error(f"Error refreshing Settings UI: {e}")
     
     def get_selected_language(self):
         """Get the selected language code."""

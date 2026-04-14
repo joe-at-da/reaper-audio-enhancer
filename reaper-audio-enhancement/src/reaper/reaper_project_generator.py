@@ -66,16 +66,12 @@ class ReaperProjectGenerator:
             ))
             track_index += 1
         
-        # Add video track (muted so only enhancement audio plays)
+        # Note: Video tracks are NOT supported in REAPER .rpp text format
+        # The <SOURCE VIDEOFILE> tag is not recognized by REAPER
+        # Video will be added via ReaScript (OSC action) instead
         video_track = export_data.get("video_track", {})
         if video_track.get("file"):
-            lines.extend(self._create_video_track(
-                track_index,
-                video_track.get("name", "Video"),
-                video_track.get("file")
-            ))
-            track_index += 1
-            app_logger.info(f"Video track added to project: {video_track.get('file')}")
+            app_logger.info(f"Video file available (will be added via ReaScript): {video_track.get('file')}")
         
         # Add enhancement tracks
         for track_info in export_data.get("enhancement_tracks", []):

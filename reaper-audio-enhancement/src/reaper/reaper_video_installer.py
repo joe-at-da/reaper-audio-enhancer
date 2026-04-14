@@ -105,12 +105,16 @@ reaper.SetMediaItemTake_Source(take, source)
 local source_length = reaper.GetMediaSourceLength(source)
 reaper.SetMediaItemLength(item, source_length, false)
 
+-- Mute video track so only enhancement audio plays
+reaper.SetMediaTrackInfo_Value(video_track, "B_MUTE", 1)
+
 reaper.UpdateArrange()
 
 reaper.ShowMessageBox(
   "Video added successfully!\\n\\n" ..
   "File: {video_file}\\n" ..
   "Duration: " .. string.format("%.2f", source_length) .. "s\\n\\n" ..
+  "Video track is MUTED - only enhancement audio will play\\n\\n" ..
   "To view video:\\n" ..
   "1. View > Video Window (Cmd+Shift+V)\\n" ..
   "2. Click Play",

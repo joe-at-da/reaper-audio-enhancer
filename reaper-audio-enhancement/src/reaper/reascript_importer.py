@@ -131,9 +131,12 @@ def main():
     video_track = RPR_GetTrack(project, 1)
     RPR_GetSetMediaTrackInfo_String(video_track, "P_NAME", "Video", True)
     
-    # Add video file
-    video_item = RPR_AddMediaItemToTrack(video_track)
+    # Add video file using InsertMediaItem (proper way to add video)
+    # This creates a media item with the video file
+    video_item = RPR_InsertMediaItem(video_track, 0)
     video_take = RPR_GetActiveTake(video_item)
+    
+    # Create video source from file
     video_source = RPR_PCM_Source_CreateFromFile("{video_file.replace(chr(92), chr(92)*2)}")
     RPR_SetMediaItemTake_Source(video_take, video_source)
     

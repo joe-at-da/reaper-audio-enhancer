@@ -83,13 +83,14 @@ class AnalysisThread(QThread):
             self.error.emit(str(e))
 
 class MainWindow(QMainWindow):
-    def __init__(self, demo_mode=False):
+    def __init__(self, demo_mode=False, demo_type=None):
         super().__init__()
         self.localization = get_localization()
         self.audio_file = None
         self.video_file = None
         self.analysis_results = None
         self.demo_mode = demo_mode
+        self.demo_type = demo_type or "snow"
         
         # Configure REAPER to use VLC for video playback
         reaper_writer = get_reaper_config_writer()
@@ -218,25 +219,35 @@ class MainWindow(QMainWindow):
         central_widget.setLayout(layout)
     
     def load_demo_files(self):
-        """Load sample files for demo/onboarding mode."""
+        """Load sample files for demo/onboarding mode based on demo_type."""
         try:
             project_root = Path(__file__).parent.parent.parent
-            audio_file = project_root / "assets" / "sample_files" / "sample_audio.wav"
-            video_file = project_root / "assets" / "sample_files" / "sample_video.mp4"
+            sample_files_dir = project_root / "assets" / "sample_files"
+            
+            # Map demo types to file names
+            demo_files = {
+                "snow": ("sample_audio.wav", "sample_video.mp4"),
+                "rain": ("sample_audio_rain.wav", "sample_video_rain.mp4"),
+                "car": ("sample_audio_car.wav", "sample_video_car.mp4"),
+            }
+            
+            audio_name, video_name = demo_files.get(self.demo_type, demo_files["snow"])
+            audio_file = sample_files_dir / audio_name
+            video_file = sample_files_dir / video_name
             
             if audio_file.exists():
                 self.audio_file = str(audio_file)
-                self.audio_label.setText(f"{audio_file.name} (Demo)")
+                self.audio_label.setText(f"{audio_file.name} (Demo - {self.demo_type})")
                 demo_audio_msg = self.localization.get("demo_mode_audio_only")
                 self.status_label.setText(demo_audio_msg)
             
             if video_file.exists():
                 self.video_file = str(video_file)
-                self.video_label.setText(f"{video_file.name} (Demo)")
+                self.video_label.setText(f"{video_file.name} (Demo - {self.demo_type})")
                 demo_loaded_msg = self.localization.get("demo_mode_loaded")
                 self.status_label.setText(demo_loaded_msg)
                 
-            app_logger.info("Demo files loaded successfully")
+            app_logger.info(f"Demo files loaded successfully ({self.demo_type} mode)")
         except Exception as e:
             app_logger.error(f"Error loading demo files: {e}")
     

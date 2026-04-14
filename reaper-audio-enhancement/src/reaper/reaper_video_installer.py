@@ -55,6 +55,7 @@ class ReaperVideoInstaller:
     def _create_lua_script(self):
         """Create Lua ReaScript for adding video to REAPER."""
         # Use provided video file or default
+        # Note: video_file should be the no-audio version created during export
         video_file = self.video_file or "/Users/joebradley/Projects/ihor-audio-main/reaper-audio-enhancement/assets/sample_files/sample_video.mp4"
         
         return f"""-- REAPER ReaScript: Add Video to Project
@@ -105,16 +106,12 @@ reaper.SetMediaItemTake_Source(take, source)
 local source_length = reaper.GetMediaSourceLength(source)
 reaper.SetMediaItemLength(item, source_length, false)
 
--- Mute video track so only enhancement audio plays
-reaper.SetMediaTrackInfo_Value(video_track, "B_MUTE", 1)
-
 reaper.UpdateArrange()
 
 reaper.ShowMessageBox(
   "Video added successfully!\\n\\n" ..
   "File: {video_file}\\n" ..
   "Duration: " .. string.format("%.2f", source_length) .. "s\\n\\n" ..
-  "Video track is MUTED - only enhancement audio will play\\n\\n" ..
   "To view video:\\n" ..
   "1. View > Video Window (Cmd+Shift+V)\\n" ..
   "2. Click Play",

@@ -429,8 +429,21 @@ class MainWindow(QMainWindow):
                 QMessageBox.critical(self, error_msg, "Failed to generate REAPER project file")
                 return
             
-            # Install video script with the video file path
-            video_installer = get_reaper_video_installer(self.video_file)
+            # Strip audio from video file before installing script
+            from src.video.video_processor import VideoProcessor
+            
+            video_file_to_use = self.video_file
+            if self.video_file:
+                app_logger.info(f"Stripping audio from video: {self.video_file}")
+                no_audio_video = VideoProcessor.strip_audio_from_video(self.video_file)
+                if no_audio_video:
+                    video_file_to_use = str(no_audio_video)
+                    app_logger.info(f"Using video without audio: {video_file_to_use}")
+                else:
+                    app_logger.warning("Could not strip audio, using original video file")
+            
+            # Install video script with the video file path (now without audio)
+            video_installer = get_reaper_video_installer(video_file_to_use)
             script_installed = video_installer.install_video_script()
             if script_installed:
                 video_installer.create_reaper_action()

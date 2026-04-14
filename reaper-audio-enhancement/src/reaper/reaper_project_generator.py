@@ -51,7 +51,7 @@ class ReaperProjectGenerator:
         # Add tracks
         track_index = 0
         
-        # Add original audio track
+        # Add original audio track (muted so only enhancement audio plays)
         audio_track = export_data.get("audio_track", {})
         if audio_track.get("file"):
             lines.extend(self._create_audio_track(
@@ -61,7 +61,8 @@ class ReaperProjectGenerator:
                 0,
                 1.0,
                 0,
-                0
+                0,
+                mute=True
             ))
             track_index += 1
         
@@ -88,13 +89,14 @@ class ReaperProjectGenerator:
         lines.append(">")
         return "\n".join(lines)
     
-    def _create_audio_track(self, track_index, name, file_path, start_time, volume, fade_in, fade_out):
+    def _create_audio_track(self, track_index, name, file_path, start_time=0, volume=1.0, fade_in=0, fade_out=0, mute=False):
         """Create audio track lines."""
         lines = []
         lines.append(f"  <TRACK {track_index}")
         lines.append(f"    NAME {name}")
         lines.append(f"    VOLPAN {volume} 0 -1 -1 1")
-        lines.append(f"    MUTESOLO 0 0 0")
+        mute_value = 1 if mute else 0
+        lines.append(f"    MUTESOLO {mute_value} 0 0")
         lines.append(f"    IPHASE 0")
         lines.append(f"    PLAYOFFS 0 1")
         lines.append(f"    CSURF 0 0 0")
@@ -110,10 +112,13 @@ class ReaperProjectGenerator:
         
         # Add media item
         if file_path:
+            # Get audio duration
+            duration = self._get_audio_duration(file_path)
+            
             lines.append(f"    <ITEM")
             lines.append(f"      POSITION {start_time}")
             lines.append(f"      SNAPOFFS 0")
-            lines.append(f"      LENGTH 10")
+            lines.append(f"      LENGTH {duration}")
             lines.append(f"      BASE_PITCH 1")
             lines.append(f"      PLAYRATE 1")
             lines.append(f"      CHANMODE 0")
@@ -166,6 +171,19 @@ class ReaperProjectGenerator:
         
         lines.append(f"  >")
         return lines
+    
+    def _get_audio_duration(self, file_path):
+        """Get audio duration in seconds using librosa."""
+        try:
+            import librosa
+            y, sr = librosa.load(str(file_path), sr=None)
+            duration = len(y) / sr
+            return duration
+        except Exception as e:
+            app_logger.debug(f"Could not get audio duration: {e}")
+        
+        # Default to 20 seconds if we can't get duration
+        return 20.0
     
     def _get_video_duration(self, file_path):
         """Get video duration in seconds."""

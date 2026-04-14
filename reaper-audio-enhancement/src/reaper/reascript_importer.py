@@ -120,6 +120,9 @@ def main():
     audio_source_length = RPR_GetMediaSourceLength(audio_source)
     RPR_SetMediaItemLength(audio_item, audio_source_length, False)
     
+    # Mute original audio track (we'll use enhancement tracks instead)
+    RPR_SetMediaTrackInfo_Value(audio_track, "B_MUTE", 1)
+    
     # Apply noise reduction (as a note - actual FX application requires more complex setup)
     # Noise reduction strength: {noise_strength}
     

@@ -116,6 +116,10 @@ def main():
     audio_source = RPR_PCM_Source_CreateFromFile("{audio_file.replace(chr(92), chr(92)*2)}")
     RPR_SetMediaItemTake_Source(audio_take, audio_source)
     
+    # Set audio item length to match audio file duration
+    audio_source_length = RPR_GetMediaSourceLength(audio_source)
+    RPR_SetMediaItemLength(audio_item, audio_source_length, False)
+    
     # Apply noise reduction (as a note - actual FX application requires more complex setup)
     # Noise reduction strength: {noise_strength}
     
@@ -129,6 +133,13 @@ def main():
     video_take = RPR_GetActiveTake(video_item)
     video_source = RPR_PCM_Source_CreateFromFile("{video_file.replace(chr(92), chr(92)*2)}")
     RPR_SetMediaItemTake_Source(video_take, video_source)
+    
+    # Set video item length to match video file duration
+    video_source_length = RPR_GetMediaSourceLength(video_source)
+    RPR_SetMediaItemLength(video_item, video_source_length, False)
+    
+    # Mute video track so only enhancement audio plays
+    RPR_SetMediaTrackInfo_Value(video_track, "B_MUTE", 1)
 {enhancement_code}
     
     # Refresh UI

@@ -1,9 +1,16 @@
 import cv2
 import numpy as np
 from src.utils import app_logger
+from src.video.scene_classifier import get_scene_classifier
 
 class SceneDetector:
-    def __init__(self):
+    def __init__(self, use_ml_classifier=True):
+        """
+        Initialize scene detector.
+        
+        Args:
+            use_ml_classifier: If True, use trained ML classifier if available
+        """
         self.scene_types = [
             "storm",
             "car_ride",
@@ -12,6 +19,17 @@ class SceneDetector:
             "traffic",
             "quiet",
         ]
+        
+        # Try to load ML classifier if requested
+        self.ml_classifier = None
+        if use_ml_classifier:
+            try:
+                classifier = get_scene_classifier()
+                if classifier.is_trained():
+                    self.ml_classifier = classifier
+                    app_logger.info(f"Using ML classifier trained on: {classifier.scene_types}")
+            except Exception as e:
+                app_logger.debug(f"ML classifier not available: {e}")
     
     def detect_scenes(self, video_path, interval=1.0, change_threshold=0.30):
         """
@@ -85,55 +103,89 @@ class SceneDetector:
     def _analyze_frame(self, frame):
         """
         Analyze a single frame to detect scene type.
-        Uses basic heuristics based on color brightness and edges.
+        Uses ML classifier if available, falls back to heuristic matching.
         """
         try:
-            hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
+            # Try ML classifier first if available
+            if self.ml_classifier is not None:
+                scene_type, confidence = self.ml_classifier.classify_frame(frame)
+                return scene_type, confidence
+            
+            # Fallback to heuristic matching
+            scene_type, confidence = self._match_scene_to_audio(None, frame)
+            return scene_type, confidence
+        except Exception as e:
+            app_logger.error(f"Error analyzing frame: {e}")
+            return "outdoor", 0.5
+    
+    def _match_scene_to_audio(self, features, frame):
+        """
+        Match frame features to available audio files.
+        Uses visual cues to determine which audio would best match.
+        """
+        try:
             gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+            hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
             
-            h, w = frame.shape[:2]
-            
-            # Calculate brightness (V channel in HSV)
+            # Calculate visual characteristics
             brightness = np.mean(gray)
+            saturation = np.mean(hsv[:, :, 1])
             
-            # Calculate edge density (indicates complexity/detail)
+            # Detect water/rain patterns (blue/cyan colors with reflections)
+            blue_channel = frame[:, :, 0]
+            green_channel = frame[:, :, 1]
+            red_channel = frame[:, :, 2]
+            
+            blue_intensity = np.mean(blue_channel)
+            green_intensity = np.mean(green_channel)
+            red_intensity = np.mean(red_channel)
+            
+            # Rain has blue > green > red (water droplets reflect blue light)
+            # Sky has blue > red ≈ green (uniform blue)
+            blue_dominance = blue_intensity - max(green_intensity, red_intensity)
+            
+            # Detect motion/traffic patterns (high edge density)
             laplacian = cv2.Laplacian(gray, cv2.CV_64F)
             edge_density = np.mean(np.abs(laplacian))
             
-            # Calculate saturation (color intensity)
-            saturation = np.mean(hsv[:, :, 1])
+            # Score each available scene type
+            scores = {}
             
-            # Decision tree based on visual characteristics
-            # Dark scenes with high edge density = storm
-            if brightness < 100 and edge_density > 30:
-                return "storm", 0.8
+            # Rain: Blue dominance (water), medium-high brightness, some edge detail
+            # Rain can have lower edge density if blue dominance is strong
+            rain_score = 0
+            if blue_dominance > 15:
+                rain_score = 0.8  # Strong blue dominance = likely rain
+            elif blue_dominance > 5 and edge_density > 5:
+                rain_score = 0.6  # Moderate blue + some detail
+            scores["rain"] = rain_score
             
-            # Bright scenes with moderate saturation = outdoor
-            elif brightness > 120 and saturation > 50:
-                return "outdoor", 0.75
+            # Car/Traffic: High edge density (road markings, vehicles), bright
+            # Key: high edge density from road structure and vehicles
+            scores["car_ride"] = (edge_density > 15) * 0.7 + (brightness > 100) * 0.2 + (saturation > 40) * 0.1
             
-            # Very dark scenes = indoor or car_ride
-            elif brightness < 80:
-                return "car_ride", 0.65
+            # Storm: Dark, high edge density, blue dominance
+            scores["storm"] = (brightness < 100) * 0.4 + (edge_density > 30) * 0.4 + (blue_dominance > 5) * 0.2
             
-            # Medium brightness with high saturation = outdoor
-            elif brightness > 100 and saturation > 80:
-                return "outdoor", 0.7
+            # Outdoor/Nature: Bright, varied colors, natural saturation, moderate edges
+            scores["outdoor"] = (brightness > 120) * 0.4 + (saturation > 50 and saturation < 150) * 0.4 + (edge_density > 10 and edge_density < 40) * 0.2
             
-            # High edge density = traffic or complex scene
-            elif edge_density > 50:
-                return "traffic", 0.6
+            # Indoor: Medium brightness, low saturation, some structure, low-medium edges
+            # Must have low saturation to be indoor (car has higher saturation)
+            scores["indoor"] = (brightness > 80 and brightness < 120) * 0.5 + (saturation < 40) * 0.4 + (edge_density > 10 and edge_density < 30) * 0.1
             
-            # Low saturation, medium brightness = indoor
-            elif saturation < 40 and brightness > 80:
-                return "indoor", 0.6
+            # Find best match
+            best_scene = max(scores.items(), key=lambda x: x[1])
+            scene_type = best_scene[0]
+            confidence = min(0.95, max(0.5, best_scene[1]))
             
-            # Default to outdoor (most common for sample)
-            else:
-                return "outdoor", 0.55
+            app_logger.debug(f"Frame analysis - brightness:{brightness:.0f}, saturation:{saturation:.0f}, blue:{blue_intensity:.0f}, edges:{edge_density:.1f}")
+            app_logger.debug(f"Scene scores: {scores} → {scene_type} ({confidence:.2f})")
+            
+            return scene_type, confidence
         except Exception as e:
-            app_logger.error(f"Error analyzing frame: {e}")
-            return "outdoor", 0.4
+            app_logger.error(f"Error matching scene to audio: {e}")
+            return "outdoor", 0.54
     
     def _calculate_frame_difference(self, frame1, frame2):
         """

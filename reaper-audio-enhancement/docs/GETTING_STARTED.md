@@ -10,6 +10,24 @@ This tool helps you improve audio quality by:
 
 ## Step-by-Step Guide
 
+### 0. Setup ML Classifier (First Time Only)
+
+Before using the app, train the scene classifier once:
+
+```bash
+python scripts/train_scene_classifier.py
+```
+
+This trains the ML model on sample videos (rain, car, snow). The model is saved and reused forever - no retraining needed!
+
+**What this does**:
+- Extracts ML features from sample videos
+- Trains KNN classifier on 3 scene types
+- Saves model to `~/.reaper_audio_enhancement/scene_classifier.pkl`
+- App automatically uses this model for accurate scene detection
+
+See `ML_CLASSIFIER_EXPLAINED.md` for details.
+
 ### 1. Launch the App
 
 **Demo Mode** (with sample files pre-loaded):
@@ -116,11 +134,27 @@ Or use the GUI launcher if available.
 - **1.0**: Maximum noise reduction (may remove some audio detail)
 
 ### Scene Detection & Suggestions
-- The app detects scenes in your video (e.g., rain, car, outdoor)
+- **ML-based detection**: Uses trained machine learning classifier
+- Detects scenes in your video (rain, car, snow, and more!)
 - For each scene, it suggests matching ambient sounds
 - Each suggestion is on a separate REAPER track
 - Mute or adjust volume of any track you don't want
 - **Smart deduplication**: No duplicate suggestions for the same scene
+- **Extensible**: Add new scene types by providing sample videos
+
+**How it works**:
+- App uses trained ML model (`scene_classifier.pkl`)
+- Extracts features from video frames (colors, textures, edges)
+- Compares to learned patterns from training videos
+- Returns most similar scene type with confidence score
+
+**Adding new scenes**:
+1. Create sample video: `sample_video_<type>.mp4`
+2. Place in: `assets/sample_files/`
+3. Run: `python scripts/train_scene_classifier.py`
+4. Done! App recognizes new scene type
+
+See `ML_CLASSIFIER_EXPLAINED.md` for technical details.
 
 ### Exporting Your Work
 - Use REAPER's export features to save your final mix
@@ -194,13 +228,20 @@ See `OSC_AUTOMATION_SETUP.md` for step-by-step instructions.
 
 ## Need Help?
 
-See the other documentation files:
+### Machine Learning & Scene Detection
+- `ML_CLASSIFIER_EXPLAINED.md` - **START HERE** for understanding ML classifier
+- `HYBRID_SCENE_DETECTION.md` - How to add new scene types
+- `SCENE_DETECTION_IMPROVEMENTS.md` - Scene detection algorithm details
+
+### Setup & Configuration
 - `DEMO_MODES_SETUP.md` - Demo modes explained
 - `OSC_AUTOMATION_SETUP.md` - Automatic video addition
-- `SCENE_DETECTION_IMPROVEMENTS.md` - How scene detection works
 - `VLC_SETUP.md` - VLC installation and configuration
-- `FINAL_STATUS.md` - Complete technical details
+
+### Technical Details
+- `FINAL_STATUS.md` - Complete technical overview
 - `FINAL_VIDEO_SOLUTION.md` - Video integration explained
+- `SCENE_DETECTION_APPROACHES.md` - Different detection approaches
 
 ## Summary
 
